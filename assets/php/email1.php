@@ -1,43 +1,47 @@
 <?php
-
-// Check if the form is submitted using POST method
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    
-    // Retrieve form data
-    $name = $_POST["name"];
-    $email = $_POST["email"];
-    $subject = $_POST["subject"];
-    $message = $_POST["message"];
-    
-    // Validate data (you may add more validation as needed)
+    // Get the form data
+    $name = $_POST['name'];
+    $email = $_POST['email'];
+    $subject = $_POST['subject'];
+    $message = $_POST['message'];
+
+    // Validation (basic)
     if (empty($name) || empty($email) || empty($subject) || empty($message)) {
-        echo "Please fill in all the required fields.";
+        echo "All fields are required.";
         exit;
     }
-    
-    // Set recipient email address (replace with your own email)
-    $to = "your@example.com";
-    
-    // Create email headers
-    $headers = "From: $email \r\n";
-    $headers .= "Reply-To: $email \r\n";
-    
-    // Construct the email message
-    $email_message = "Name: $name\n";
-    $email_message .= "Email: $email\n";
-    $email_message .= "Subject: $subject\n\n";
-    $email_message .= "Message:\n$message";
-    
-    // Send the email
-    if (mail($to, $subject, $email_message, $headers)) {
-        echo "Your message has been sent successfully!";
-    } else {
-        echo "Oops! Something went wrong and we couldn't send your message.";
-    }
-    
-} else {
-    // If the form is not submitted using POST method, redirect to the home page or display an error message.
-    echo "Invalid request. Please submit the form from the website.";
-}
 
+    // Sanitize email and check if it's valid
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        echo "Invalid email format.";
+        exit;
+    }
+
+    // Prepare the email
+    $to = "your-email@example.com";  // Replace with your email address
+    $headers = "From: $email\r\n";
+    $headers .= "Reply-To: $email\r\n";
+    $headers .= "Content-Type: text/html; charset=UTF-8\r\n";
+    $email_subject = "Contact Form: $subject";
+    $email_body = "
+    <html>
+    <body>
+        <h2>New Message from Contact Form</h2>
+        <p><strong>Name: </strong> $name</p>
+        <p><strong>Email: </strong> $email</p>
+        <p><strong>Subject: </strong> $subject</p>
+        <p><strong>Message: </strong><br> $message</p>
+    </body>
+    </html>";
+
+    // Send the email
+    if (mail($to, $email_subject, $email_body, $headers)) {
+        echo "Message sent successfully!";
+    } else {
+        echo "There was an error sending your message. Please try again later.";
+    }
+} else {
+    echo "Invalid request.";
+}
 ?>
